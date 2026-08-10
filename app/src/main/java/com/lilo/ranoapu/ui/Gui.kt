@@ -18,12 +18,13 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.sp
 
 
-fun startRun(): Int {
-    return 0
-}
+import com.lilo.engine.Race
+
 
 @Composable
 fun MainScreen() {
+
+    val context = LocalContext.current
 
     Column(
         modifier = Modifier.fillMaxSize().background(Color.White),
@@ -57,10 +58,19 @@ fun MainScreen() {
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.Center,
         ) {
+			
+			Text(
+			    text = "%.2fs".format(Race.time),
+				fontSize = 20.sp,
+				modifier = Modifier.weight(0.2f).fillMaxHeight(0.5f),
+				
+			)
+			
             Button(
                 onClick = {
-                    startRun()
+                    Race.TryStartRace(context)
                 },
+				modifier = Modifier.weight(0.6f).fillMaxHeight(0.5f),
 
             ) {
                 Text(
@@ -68,6 +78,16 @@ fun MainScreen() {
                     fontSize = 20.sp
                 )
             }
+			
+			
+			Text(
+			    text = "${Race.dist} m",
+				fontSize = 20.sp,
+				modifier = Modifier.weight(0.2f).fillMaxHeight(0.5f),
+				
+			)
+			
+			
         }
 
     }
