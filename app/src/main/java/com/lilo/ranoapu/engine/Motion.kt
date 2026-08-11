@@ -12,12 +12,22 @@ import com.lilo.ranoapu.engine.Vector3
 
 object Motion {
 
-    private val acceleration = Vector3(0f, 0f, 0f)
+    private val acceleration = Vector3(0.0, 0.0, 0.0)
 
     private lateinit var sensorManager: SensorManager
     private lateinit var listener: SensorEventListener
+	
+	private val callbacksAcc = mutableMapOf<String, (Vector3) -> Unit>()
+	
+	fun OnAccChanged(name: String, callback: (Vector3) -> Unit) {
+		callbacksAcc[name] = callback
+	}
+	
+	fun RemoveOnAccChanged(name: String) {
+		callbacksAcc.remove(name)
+	}
 
-    fun start(context: Context, onAcceleration : () -> Unit) {
+    fun StartAcc(context: Context) {
 
         sensorManager =
             context.getSystemService(Context.SENSOR_SERVICE)
@@ -32,15 +42,13 @@ object Motion {
 
             override fun onSensorChanged(event: SensorEvent) {
 
-                acceleration.X = event.values[0]
-                acceleration.Y = event.values[1]
-                acceleration.Z = event.values[2]
+                acceleration.X = event.values[0].toDouble()
+                acceleration.Y = event.values[1].toDouble()
+                acceleration.Z = event.values[2].toDouble()
 				
-				if (acceleration.magnitude() >= 0.5f) {
-					
-					sensorManager.unregisterListener(listener)
-                    onAcceleration()
-                }
+				for ( (name, callback)  in callbacksAcc) {
+					callback(acceleration)
+				}
             
 			
             }
@@ -58,8 +66,14 @@ object Motion {
             SensorManager.SENSOR_DELAY_GAME
         )
     }
+	
+	fun EndAcc() {
+        if (! ::listener.isInitialized) return
+        sensorManager.unregisterListener(listener)
+        
+    }
 
-    fun getAcceleration(): Vector3 {
+    fun GetAcceleration(): Vector3 {
         return acceleration
     }
 }

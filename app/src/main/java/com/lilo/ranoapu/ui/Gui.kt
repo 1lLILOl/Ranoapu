@@ -16,9 +16,12 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.sp
+import androidx.compose.ui.platform.LocalContext
 
 
-import com.lilo.engine.Race
+
+import com.lilo.ranoapu.engine.Race
+import com.lilo.ranoapu.engine.Gps
 
 
 @Composable
@@ -32,7 +35,7 @@ fun MainScreen() {
     ) {
 
         Row(
-            modifier = Modifier.fillMaxWidth().fillMaxHeight(0.1f),
+            modifier = Modifier.fillMaxWidth().fillMaxHeight().weight(0.1f),
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.Center,
         ) {
@@ -46,15 +49,52 @@ fun MainScreen() {
 
 
         Column(
-            modifier = Modifier.fillMaxWidth().fillMaxHeight(0.8f)
+            modifier = Modifier.fillMaxWidth().fillMaxHeight().weight(0.65f)
         ) {
 
+            Text(
+			    text = "%.2fm".format(Race.X),
+				fontSize = 30.sp
+			)
+			Text(
+			    text = "%.2fm".format(Race.Y),
+				fontSize = 30.sp
+			)
+			Text(
+			    text = "%.2fm".format(Race.Z),
+				fontSize = 30.sp
+			)
         }
 
 
+        Row(
+		    modifier = Modifier.fillMaxWidth().fillMaxHeight().weight(0.1f),
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.Center,
+		) {
+			
+			Text(
+			    text = "Vel: %.2fm/s".format(Race.speed),
+				fontSize = 20.sp,
+				modifier = Modifier.weight(0.3f).fillMaxHeight(),
+			)
+			
+			Text(
+			    text = "Dist: %.2fm".format(Race.reachedDist),
+				fontSize = 20.sp,
+				modifier = Modifier.weight(0.4f).fillMaxHeight(),
+			)
+			
+			Text(
+			    text = "Pace: %.2fmin/km".format(Race.pace),
+				fontSize = 20.sp,
+				modifier = Modifier.weight(0.3f).fillMaxHeight(),
+			)
+		}
+
 
         Row(
-            modifier = Modifier.fillMaxWidth().fillMaxHeight(),
+            modifier = Modifier.fillMaxWidth().fillMaxHeight().weight(0.15f),
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.Center,
         ) {
@@ -62,19 +102,33 @@ fun MainScreen() {
 			Text(
 			    text = "%.2fs".format(Race.time),
 				fontSize = 20.sp,
-				modifier = Modifier.weight(0.2f).fillMaxHeight(0.5f),
+				modifier = Modifier.weight(0.15f).fillMaxHeight(0.5f),
 				
 			)
 			
+			Button(
+			    onClick = {
+					Race.EndRace()
+				},
+			    modifier = Modifier.weight(0.15f).fillMaxHeight(0.5f)
+				
+			) {
+				Text(
+				    text = "Parar corrida",
+				    fontSize = 20.sp,
+				)
+			}
+			
+			
             Button(
                 onClick = {
-                    Race.TryStartRace(context)
+                    Race.ToggleRace(context)
                 },
-				modifier = Modifier.weight(0.6f).fillMaxHeight(0.5f),
+				modifier = Modifier.weight(0.5f).fillMaxHeight(0.5f),
 
             ) {
                 Text(
-                    text = "Iniciar corrida",
+                    text = Race.runBtnMsg,
                     fontSize = 20.sp
                 )
             }

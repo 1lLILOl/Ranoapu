@@ -1,54 +1,55 @@
 package com.lilo.ranoapu.engine
 
 data class Vector3 (
-    val X : Float, 
-	val Y : Float,
-	val Z : Float
+    var X : Double, 
+	var Y : Double,
+	var Z : Double,
 ) {
 	
-    opera                                                                                tor fun plus(other : Vector3) = Vector3 (
-	    X + other.X,
+    operator fun plus(other : Vector3) = Vector3(
+		X + other.X,
 		Y + other.Y,
-		Z + other.Z
-	)
+		Z + other.Z,
+	)              
+	
 	
 	operator fun minus(other : Vector3) = Vector3 (
 	    X - other.X,
 		Y - other.Y,
-		Z - other.Z
+		Z - other.Z,
 	)
 	
 	operator fun times(other : Vector3) = Vector3 (
 	    X * other.X,
 		Y * other.Y,
-		Z * other.Z
+		Z * other.Z,
 	)
 	
-	operator fun times(value : Float) = Vector3 (
+	operator fun times(value : Double) = Vector3 (
 	    X * value,
 		Y * value,
-		Z * value
+		Z * value,
 	)
 	
 	operator fun div(other : Vector3) = Vector3 (
 	    X / other.X,
 		Y / other.Y,
-		Z / other.Z
+		Z / other.Z,
 	)
 	
-	operator fun div(value : Float) = Vector3 (
+	operator fun div(value : Double) = Vector3 (
 	    X / value,
 		Y / value,
-		Z / value
+		Z / value,
 	)
 	
-	fun magnitude(): Float {
+	fun magnitude(): Double {
         return kotlin.math.sqrt(
-            x * x + y * y + z * z
+            X * X + Y * Y + Z * Z
         )
     }
 	
-	fun dot(other: Vector3): Float {
+	fun dot(other: Vector3): Double {
         return X * other.X +
                Y * other.Y +
                Z * other.Z
@@ -61,4 +62,5 @@ data class Vector3 (
             X * other.Y - Y * other.X
         )
     }
+	
 }
