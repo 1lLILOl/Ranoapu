@@ -20,13 +20,14 @@ class MainActivity : ComponentActivity() {
 	private val locationPermissionRequest = registerForActivityResult(
 	
 	    ActivityResultContracts.RequestMultiplePermissions()
-	) { permissions ->
+	)
+	{ permissions ->
 		
 		val fineLocation = permissions[Manifest.permission.ACCESS_FINE_LOCATION] == true
 		val coarseLocation = permissions[Manifest.permission.ACCESS_COARSE_LOCATION] == true
 		
 		if (fineLocation || coarseLocation) {
-			Gps.Init(this)
+			Gps.Init(applicationContext)
         }
     }
 	

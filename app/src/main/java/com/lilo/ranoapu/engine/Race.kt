@@ -1,28 +1,18 @@
 package com.lilo.ranoapu.engine
 
+import android.Manifest
 import android.os.Handler
 import android.os.Looper
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import android.content.Context
-
-import com.lilo.ranoapu.engine.Gps
-import com.lilo.ranoapu.engine.Motion
-import com.lilo.ranoapu.engine.Vector3
+import androidx.annotation.RequiresPermission
 
 object Race {
-	
-	var maxDist by mutableStateOf(100)
-	var time by mutableStateOf(0.0)
-	var displacement by mutableStateOf(0.0)
-	var distance by mutableStateOf(0.0)
-	var pace by mutableStateOf(0.0)
-	var speed by mutableStateOf(0.0)
-	var runBtnMsg by mutableStateOf("Iniciar corrida")
-	var running by mutableStateOf(false)
-	
-	private var firstRun = true
+
+
+	private var running by mutableStateOf(false)
 	private var beginTime = 0L
 	private var beginPos = Vector3(0.0, 0.0, 0.0)
 	private var lastPos = Vector3(0.0, 0.0, 0.0)
@@ -36,22 +26,20 @@ object Race {
 		override fun run() {
 				
 			val now = System.nanoTime()
-			
 			val currentTime = elapsedTime + (now - beginTime)
 				
-			time = (currentTime) / 1_000_000_000.0
+			RaceData.time = (currentTime) / 1_000_000_000.0
 			val currentPos = Gps.GetPosition()
-				
-			distance = (currentPos - beginPos).magnitude()
-			displacement += (currentPos - lastPos).magnitude()
+
+			RaceData.distance = (currentPos - beginPos).magnitude()
+			RaceData.displacement += (currentPos - lastPos).magnitude()
 			
 			lastPos = currentPos
 				
-			if (displacement >= maxDist ){
-					
-				Motion.RemoveOnAccChanged("StartRace")
-				StopRace()
-				runBtnMsg = "Corrida finalizada, reestarte"
+			if (RaceData.displacement >= RaceData.maxDist ){
+
+				EndRace()
+				RaceData.runBtnMsg = "Corrida finalizada"
 				return
 			}
 	        
@@ -61,52 +49,50 @@ object Race {
 	}
 	
 	fun ToggleRace(context : Context) {
-		
+
+		if (!RaceData.raceStarted) {
+
+			ResetRace()
+			Motion.StartAcc(context)
+			beginPos = Gps.GetPosition()
+
+			RaceData.raceStarted = true
+		}
+
 		if (running) {
 			
-			Motion.RemoveOnAccChanged("StartRace")
-			StopRace()
-			runBtnMsg = "Iniciar corrida"
+			EndRace()
+			RaceData.runBtnMsg = "Iniciar corrida"
 			
 		} else {
 			
 			Motion.OnAccChanged("StartRace", ::StartRace)
-		}
-		
-		if (firstRun) {
-			Motion.StartAcc(context)
-			Gps.Init(context)
+			RaceData.runBtnMsg = "Pausar corrida"
 		}
 		
 	}
 	
-	private fun StartRace(acc :Vector3) {
+	@RequiresPermission(allOf = [Manifest.permission.ACCESS_FINE_LOCATION, Manifest.permission.ACCESS_COARSE_LOCATION])
+    private fun StartRace(context: Context, acc :Vector3) {
 		
-		Gps.UpdateLocation { location ->}
+		Gps.UpdateLocation(context, onLocation = { _, ->})
 			
-		speed = (displacement/time) * 3.6
-		pace = 60 /speed
+		RaceData.speed = (RaceData.displacement/RaceData.time) * 3.6
+		RaceData.pace = 60 / RaceData.speed
 		
 
 		if (acc.magnitude() < 1) {
-			
+
 			StopRace()
-			runBtnMsg = "Pausa automática"
+			RaceData.automaticPause = true
 			return
 		}
 		
-		if (firstRun) {
-		    
-		    beginPos = Gps.GetPosition()
-			
-			firstRun = false
-		}
-		
 		if (!running) {
-			
+
 		    running = true
+			RaceData.automaticPause = false
 		    handler.post(timer)
-		    runBtnMsg = "Pausar corrida"
 			beginTime = System.nanoTime()
 		}
 	    
@@ -122,26 +108,18 @@ object Race {
 		
 		handler.removeCallbacks(timer)
 	}
-	
-	fun EndRace() {
-		
+
+	fun ResetRace() {
+
 		StopRace()
-		
-		time = 0.0
-		elapsedTime = 0L
-		pace = 0.0
-		displacement = 0.0
-		distance = 0.0
-		speed = 0.0
-		
-		runBtnMsg = "Iniciar corrida"
-		firstRun = true
+		RaceData.ResetAllData()
+
 		Motion.EndAcc()
-		
 	}
-	
-	fun SetDist(value: Int) {
-		maxDist = value
+	fun EndRace() {
+
+		Motion.RemoveOnAccChanged("StartRace")
+		StopRace()
 	}
 	
 	

@@ -7,8 +7,6 @@ import android.hardware.SensorEventListener
 import android.hardware.SensorManager
 
 
-import com.lilo.ranoapu.engine.Vector3
-
 
 object Motion {
 
@@ -17,9 +15,9 @@ object Motion {
     private lateinit var sensorManager: SensorManager
     private lateinit var listener: SensorEventListener
 	
-	private val callbacksAcc = mutableMapOf<String, (Vector3) -> Unit>()
+	private val callbacksAcc = mutableMapOf<String, (Context, Vector3) -> Unit>()
 	
-	fun OnAccChanged(name: String, callback: (Vector3) -> Unit) {
+	fun OnAccChanged(name: String, callback: (Context, Vector3) -> Unit) {
 		callbacksAcc[name] = callback
 	}
 	
@@ -46,8 +44,8 @@ object Motion {
                 acceleration.Y = event.values[1].toDouble()
                 acceleration.Z = event.values[2].toDouble()
 				
-				for ( (name, callback)  in callbacksAcc) {
-					callback(acceleration)
+				for ( (_, callback)  in callbacksAcc) {
+					callback(context, acceleration)
 				}
             
 			

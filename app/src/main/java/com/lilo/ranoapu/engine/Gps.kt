@@ -4,6 +4,8 @@ import android.Manifest
 import android.location.Location
 import android.content.Context
 import android.content.pm.PackageManager
+import androidx.annotation.RequiresPermission
+import androidx.compose.ui.platform.LocalContext
 
 import androidx.core.app.ActivityCompat
 
@@ -15,22 +17,20 @@ import kotlin.math.PI
 import kotlin.math.cos
 
 
-import com.lilo.ranoapu.engine.Vector3
-
 object Gps {
 	
 	private lateinit var fusedLocationClient: FusedLocationProviderClient
-	private lateinit var context: Context
-		
-	fun Init(context: Context) {
-		this.context = context.applicationContext
-	
+
+
+	@RequiresPermission(allOf = [Manifest.permission.ACCESS_FINE_LOCATION, Manifest.permission.ACCESS_COARSE_LOCATION])
+    fun Init(context: Context) {
+
 		fusedLocationClient =
             LocationServices.getFusedLocationProviderClient(context)
 			
-		UpdateLocation { loc ->
+		UpdateLocation(context, onLocation = { loc ->
 			axysZero = loc
-		}
+		})
 	}
 	
 	private lateinit var location: Location
@@ -38,18 +38,21 @@ object Gps {
 	private lateinit var axysZero: Location
 	
 	private var hasPerms = false
-	private fun HasPermissions(): Boolean {
+	private fun HasPermissions(context: Context): Boolean {
 		
 		if (
 		    ActivityCompat.checkSelfPermission(
 			    context, Manifest.permission.ACCESS_FINE_LOCATION
-			) != 
+			)
+			!=
 			PackageManager.PERMISSION_GRANTED
+
 			&&
 			
 			ActivityCompat.checkSelfPermission(
 			    context, Manifest.permission.ACCESS_COARSE_LOCATION
-			) != 
+			)
+			!=
 			PackageManager.PERMISSION_GRANTED
 		) {
 			
@@ -62,9 +65,10 @@ object Gps {
 	}
 	
 	
-	fun UpdateLocation(onLocation: (Location) -> Unit) {
+	@RequiresPermission(allOf = [Manifest.permission.ACCESS_FINE_LOCATION, Manifest.permission.ACCESS_COARSE_LOCATION])
+	fun UpdateLocation(context: Context, onLocation: (Location) -> Unit) {
 		
-		if (!hasPerms && !HasPermissions()) return
+		if (!hasPerms && !HasPermissions(context)) return
 		
 		fusedLocationClient.getCurrentLocation(
 		    Priority.PRIORITY_HIGH_ACCURACY,
@@ -86,26 +90,22 @@ object Gps {
 
 	fun GetPosition() : Vector3 {
 		
-		val X = (location.longitude - axysZero.longitude) * 
+		val x = (location.longitude - axysZero.longitude) *
 		    metersPerDegree * 
 		    cos(axysZero.latitude * degreeToRad)
 			
-		val Y = (location.altitude - axysZero.altitude)
+		val y = (location.altitude - axysZero.altitude)
 			
-		val Z = (location.latitude - axysZero.latitude) * 
+		val z = (location.latitude - axysZero.latitude) *
 		    metersPerDegree
 		
 		position = Vector3(
 		
-		    X, Y, Z
+		    x, y, z
 		)
 		
 	    return position
     }
-	
-	fun GetSpeed() : Float {
-		
-		return location.speed
-	}
+
 	
 }
