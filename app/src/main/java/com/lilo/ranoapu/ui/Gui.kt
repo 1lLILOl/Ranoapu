@@ -52,18 +52,6 @@ fun MainScreen() {
             modifier = Modifier.fillMaxWidth().fillMaxHeight().weight(0.65f)
         ) {
 
-            Text(
-			    text = "%.2fm".format(Race.X),
-				fontSize = 30.sp
-			)
-			Text(
-			    text = "%.2fm".format(Race.Y),
-				fontSize = 30.sp
-			)
-			Text(
-			    text = "%.2fm".format(Race.Z),
-				fontSize = 30.sp
-			)
         }
 
 
@@ -74,21 +62,27 @@ fun MainScreen() {
 		) {
 			
 			Text(
-			    text = "Vel: %.2fm/s".format(Race.speed),
+			    text = "Velocidade média: %.2fkm/h".format(Race.speed),
 				fontSize = 20.sp,
-				modifier = Modifier.weight(0.3f).fillMaxHeight(),
+				modifier = Modifier.weight(0.25f).fillMaxHeight(),
 			)
 			
 			Text(
-			    text = "Dist: %.2fm".format(Race.reachedDist),
+			    text = "Deslocamento: %.2fm".format(Race.displacement),
 				fontSize = 20.sp,
-				modifier = Modifier.weight(0.4f).fillMaxHeight(),
+				modifier = Modifier.weight(0.25f).fillMaxHeight(),
+			)
+			
+			Text(
+			    text = "Distância: %.2fm".format(Race.distance),
+				fontSize = 20.sp,
+				modifier = Modifier.weight(0.25f).fillMaxHeight(),
 			)
 			
 			Text(
 			    text = "Pace: %.2fmin/km".format(Race.pace),
 				fontSize = 20.sp,
-				modifier = Modifier.weight(0.3f).fillMaxHeight(),
+				modifier = Modifier.weight(0.25f).fillMaxHeight(),
 			)
 		}
 
@@ -135,7 +129,7 @@ fun MainScreen() {
 			
 			
 			Text(
-			    text = "${Race.dist} m",
+			    text = "${Race.maxDist} m",
 				fontSize = 20.sp,
 				modifier = Modifier.weight(0.2f).fillMaxHeight(0.5f),
 				

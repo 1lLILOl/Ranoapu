@@ -13,23 +13,21 @@ import com.lilo.ranoapu.engine.Vector3
 
 object Race {
 	
-	var dist by mutableStateOf(100)
+	var maxDist by mutableStateOf(100)
 	var time by mutableStateOf(0.0)
-	var reachedDist by mutableStateOf(0.0)
-	var pace by mutableStateOf(0f)
-	var speed by mutableStateOf(0f)
+	var displacement by mutableStateOf(0.0)
+	var distance by mutableStateOf(0.0)
+	var pace by mutableStateOf(0.0)
+	var speed by mutableStateOf(0.0)
 	var runBtnMsg by mutableStateOf("Iniciar corrida")
 	var running by mutableStateOf(false)
 	
 	private var firstRun = true
 	private var beginTime = 0L
 	private var beginPos = Vector3(0.0, 0.0, 0.0)
+	private var lastPos = Vector3(0.0, 0.0, 0.0)
 	private var elapsedTime = 0L
 	
-	
-	var X by mutableStateOf(0.0)
-	var Y by mutableStateOf(0.0)
-	var Z by mutableStateOf(0.0)
 	
 	private val handler = Handler(Looper.getMainLooper())
 	
@@ -44,10 +42,14 @@ object Race {
 			time = (currentTime) / 1_000_000_000.0
 			val currentPos = Gps.GetPosition()
 				
-			reachedDist = (currentPos - beginPos).magnitude()
+			distance = (currentPos - beginPos).magnitude()
+			displacement += (currentPos - lastPos).magnitude()
+			
+			lastPos = currentPos
 				
-			if ( reachedDist >= dist ){
+			if (displacement >= maxDist ){
 					
+				Motion.RemoveOnAccChanged("StartRace")
 				StopRace()
 				runBtnMsg = "Corrida finalizada, reestarte"
 				return
@@ -82,16 +84,11 @@ object Race {
 		
 		Gps.UpdateLocation { location ->}
 			
-		speed = Gps.GetSpeed()
-		pace = 60f / (speed * 3.6f)
+		speed = (displacement/time) * 3.6
+		pace = 60 /speed
 		
 
 		if (acc.magnitude() < 1) {
-			
-			val pos = Gps.GetPosition()
-			X = pos.X
-			Y = pos.Y
-			Z = pos.Z
 			
 			StopRace()
 			runBtnMsg = "Pausa automática"
@@ -132,9 +129,10 @@ object Race {
 		
 		time = 0.0
 		elapsedTime = 0L
-		pace = 0f
-		reachedDist = 0.0
-		speed = 0f
+		pace = 0.0
+		displacement = 0.0
+		distance = 0.0
+		speed = 0.0
 		
 		runBtnMsg = "Iniciar corrida"
 		firstRun = true
@@ -143,7 +141,7 @@ object Race {
 	}
 	
 	fun SetDist(value: Int) {
-		dist = value
+		maxDist = value
 	}
 	
 	

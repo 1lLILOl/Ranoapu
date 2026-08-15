@@ -35,10 +35,10 @@ object Gps {
 	
 	private lateinit var location: Location
 	private var position = Vector3(0.0, 0.0, 0.0)
-    private var speed = 0f
 	private lateinit var axysZero: Location
 	
-	fun UpdateLocation(onLocation: (Location) -> Unit) {
+	private var hasPerms = false
+	private fun HasPermissions(): Boolean {
 		
 		if (
 		    ActivityCompat.checkSelfPermission(
@@ -53,8 +53,18 @@ object Gps {
 			PackageManager.PERMISSION_GRANTED
 		) {
 			
-		    return
+		    return false
 		}
+		
+		hasPerms = true
+		
+		return true
+	}
+	
+	
+	fun UpdateLocation(onLocation: (Location) -> Unit) {
+		
+		if (!hasPerms && !HasPermissions()) return
 		
 		fusedLocationClient.getCurrentLocation(
 		    Priority.PRIORITY_HIGH_ACCURACY,
@@ -70,33 +80,32 @@ object Gps {
 	}
     
 	
+	
+	private val metersPerDegree = 40075000 / 360
+	private val degreeToRad = PI / 180
 
 	fun GetPosition() : Vector3 {
 		
 		val X = (location.longitude - axysZero.longitude) * 
-		    40075000 / 360 * 
-		    cos(axysZero.latitude * PI / 180)
+		    metersPerDegree * 
+		    cos(axysZero.latitude * degreeToRad)
 			
 		val Y = (location.altitude - axysZero.altitude)
 			
 		val Z = (location.latitude - axysZero.latitude) * 
-		    40075000 / 360
+		    metersPerDegree
 		
 		position = Vector3(
 		
 		    X, Y, Z
 		)
 		
-		
 	    return position
     }
 	
 	fun GetSpeed() : Float {
 		
-		speed = location.speed
-		
-		return speed
+		return location.speed
 	}
-	
 	
 }
