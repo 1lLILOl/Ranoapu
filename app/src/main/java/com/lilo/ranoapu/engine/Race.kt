@@ -38,8 +38,9 @@ object Race {
 				
 			if (RaceData.displacement >= RaceData.maxDist ){
 
-				EndRace()
-				RaceData.runBtnMsg = "Corrida finalizada"
+				RaceData.raceFinished = true
+				Motion.RemoveOnAccChanged("StartRace")
+				StopRace()
 				return
 			}
 	        
@@ -59,16 +60,17 @@ object Race {
 			RaceData.raceStarted = true
 		}
 
-		if (running) {
-			
-			EndRace()
-			RaceData.runBtnMsg = "Iniciar corrida"
+		if (RaceData.manualPause) {
+
+			Motion.OnAccChanged("StartRace", ::StartRace)
 			
 		} else {
-			
-			Motion.OnAccChanged("StartRace", ::StartRace)
-			RaceData.runBtnMsg = "Pausar corrida"
+
+			Motion.RemoveOnAccChanged("StartRace")
+			StopRace()
 		}
+
+		RaceData.manualPause = !RaceData.manualPause
 		
 	}
 	
@@ -111,15 +113,14 @@ object Race {
 
 	fun ResetRace() {
 
+		Motion.RemoveOnAccChanged("StartRace")
 		StopRace()
 		RaceData.ResetAllData()
 
-		Motion.EndAcc()
-	}
-	fun EndRace() {
+		elapsedTime = 0
+		lastPos = Vector3(0.0, 0.0, 0.0)
 
-		Motion.RemoveOnAccChanged("StartRace")
-		StopRace()
+		Motion.EndAcc()
 	}
 	
 	

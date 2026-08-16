@@ -14,19 +14,21 @@ object RaceData {
     var distance by mutableDoubleStateOf(0.0)
     var pace by mutableDoubleStateOf(0.0)
     var speed by mutableDoubleStateOf(0.0)
-    var runBtnMsg by mutableStateOf("Iniciar corrida")
     var automaticPause by mutableStateOf(false)
     var raceStarted by mutableStateOf(false)
+    var manualPause by mutableStateOf(true)
+    var raceFinished by mutableStateOf(false)
 
     fun ResetAllData() {
 
-        maxDist = 100
         time = 0.0
         displacement = 0.0
         distance = 0.0
         pace = 0.0
         speed = 0.0
-        runBtnMsg ="Iniciar corrida"
         raceStarted = false
+        automaticPause = false
+        manualPause = true
+        raceFinished = false
     }
 }
