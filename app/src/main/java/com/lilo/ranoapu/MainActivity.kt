@@ -27,7 +27,7 @@ class MainActivity : ComponentActivity() {
 		val coarseLocation = permissions[Manifest.permission.ACCESS_COARSE_LOCATION] == true
 		
 		if (fineLocation || coarseLocation) {
-			Gps.Init(applicationContext)
+			Gps.init(applicationContext)
         }
     }
 	

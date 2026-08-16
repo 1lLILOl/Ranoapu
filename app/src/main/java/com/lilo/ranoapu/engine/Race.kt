@@ -29,7 +29,7 @@ object Race {
 			val currentTime = elapsedTime + (now - beginTime)
 				
 			RaceData.time = (currentTime) / 1_000_000_000.0
-			val currentPos = Gps.GetPosition()
+			val currentPos = Gps.getPosition()
 
 			RaceData.distance = (currentPos - beginPos).magnitude()
 			RaceData.displacement += (currentPos - lastPos).magnitude()
@@ -39,8 +39,8 @@ object Race {
 			if (RaceData.displacement >= RaceData.maxDist ){
 
 				RaceData.raceFinished = true
-				Motion.RemoveOnAccChanged("StartRace")
-				StopRace()
+				Motion.removeOnAccChanged("StartRace")
+				stopRace()
 				return
 			}
 	        
@@ -49,25 +49,25 @@ object Race {
 		}
 	}
 	
-	fun ToggleRace(context : Context) {
+	fun toggleRace(context : Context) {
 
 		if (!RaceData.raceStarted) {
 
-			ResetRace()
-			Motion.StartAcc(context)
-			beginPos = Gps.GetPosition()
+			resetRace()
+			Motion.startAcc(context)
+			beginPos = Gps.getPosition()
 
 			RaceData.raceStarted = true
 		}
 
 		if (RaceData.manualPause) {
 
-			Motion.OnAccChanged("StartRace", ::StartRace)
+			Motion.onAccChanged("StartRace", ::startRace)
 			
 		} else {
 
-			Motion.RemoveOnAccChanged("StartRace")
-			StopRace()
+			Motion.removeOnAccChanged("StartRace")
+			stopRace()
 		}
 
 		RaceData.manualPause = !RaceData.manualPause
@@ -75,9 +75,9 @@ object Race {
 	}
 	
 	@RequiresPermission(allOf = [Manifest.permission.ACCESS_FINE_LOCATION, Manifest.permission.ACCESS_COARSE_LOCATION])
-    private fun StartRace(context: Context, acc :Vector3) {
+    private fun startRace(context: Context, acc :Vector3) {
 		
-		Gps.UpdateLocation(context, onLocation = { _, ->})
+		Gps.updateLocation(context, onLocation = { _, ->})
 			
 		RaceData.speed = (RaceData.displacement/RaceData.time) * 3.6
 		RaceData.pace = 60 / RaceData.speed
@@ -85,7 +85,7 @@ object Race {
 
 		if (acc.magnitude() < 1) {
 
-			StopRace()
+			stopRace()
 			RaceData.automaticPause = true
 			return
 		}
@@ -100,7 +100,7 @@ object Race {
 	    
 	}
 	
-	private fun StopRace() {
+	private fun stopRace() {
 		
 		if (!running) return
 		
@@ -111,16 +111,16 @@ object Race {
 		handler.removeCallbacks(timer)
 	}
 
-	fun ResetRace() {
+	fun resetRace() {
 
-		Motion.RemoveOnAccChanged("StartRace")
-		StopRace()
-		RaceData.ResetAllData()
+		Motion.removeOnAccChanged("StartRace")
+		stopRace()
+		RaceData.resetAllData()
 
 		elapsedTime = 0
 		lastPos = Vector3(0.0, 0.0, 0.0)
 
-		Motion.EndAcc()
+		Motion.endAcc()
 	}
 	
 	

@@ -19,7 +19,7 @@ object RaceData {
     var manualPause by mutableStateOf(true)
     var raceFinished by mutableStateOf(false)
 
-    fun ResetAllData() {
+    fun resetAllData() {
 
         time = 0.0
         displacement = 0.0

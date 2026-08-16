@@ -166,7 +166,7 @@ fun MainScreen() {
 
 					Button(
 						onClick = {
-							Race.ResetRace()
+							Race.resetRace()
 						},
 						shape = RoundedCornerShape(16),
 						colors = ButtonDefaults.buttonColors(
@@ -193,7 +193,7 @@ fun MainScreen() {
 
 					Button(
 						onClick = {
-							Race.ToggleRace(context)
+							Race.toggleRace(context)
 						},
 						shape = RoundedCornerShape(30),
 						colors = ButtonDefaults.buttonColors(

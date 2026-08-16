@@ -5,7 +5,6 @@ import android.location.Location
 import android.content.Context
 import android.content.pm.PackageManager
 import androidx.annotation.RequiresPermission
-import androidx.compose.ui.platform.LocalContext
 
 import androidx.core.app.ActivityCompat
 
@@ -23,12 +22,12 @@ object Gps {
 
 
 	@RequiresPermission(allOf = [Manifest.permission.ACCESS_FINE_LOCATION, Manifest.permission.ACCESS_COARSE_LOCATION])
-    fun Init(context: Context) {
+    fun init(context: Context) {
 
 		fusedLocationClient =
             LocationServices.getFusedLocationProviderClient(context)
 			
-		UpdateLocation(context, onLocation = { loc ->
+		updateLocation(context, onLocation = { loc ->
 			axysZero = loc
 		})
 	}
@@ -38,7 +37,7 @@ object Gps {
 	private lateinit var axysZero: Location
 	
 	private var hasPerms = false
-	private fun HasPermissions(context: Context): Boolean {
+	private fun hasPermissions(context: Context): Boolean {
 		
 		if (
 		    ActivityCompat.checkSelfPermission(
@@ -66,9 +65,9 @@ object Gps {
 	
 	
 	@RequiresPermission(allOf = [Manifest.permission.ACCESS_FINE_LOCATION, Manifest.permission.ACCESS_COARSE_LOCATION])
-	fun UpdateLocation(context: Context, onLocation: (Location) -> Unit) {
+	fun updateLocation(context: Context, onLocation: (Location) -> Unit) {
 		
-		if (!hasPerms && !HasPermissions(context)) return
+		if (!hasPerms && !hasPermissions(context)) return
 		
 		fusedLocationClient.getCurrentLocation(
 		    Priority.PRIORITY_HIGH_ACCURACY,
@@ -85,27 +84,31 @@ object Gps {
     
 	
 	
-	private val metersPerDegree = 40075000 / 360
-	private val degreeToRad = PI / 180
+	private const val METERSPERDEGREE = 40075000 / 360
+	private const val DEGREETORAD = PI / 180
 
-	fun GetPosition() : Vector3 {
+	fun getPosition() : Vector3 {
 		
 		val x = (location.longitude - axysZero.longitude) *
-		    metersPerDegree * 
-		    cos(axysZero.latitude * degreeToRad)
+				METERSPERDEGREE *
+		    cos(axysZero.latitude * DEGREETORAD)
 			
-		val y = (location.altitude - axysZero.altitude)
+		//val y = (location.altitude - axysZero.altitude)
 			
 		val z = (location.latitude - axysZero.latitude) *
-		    metersPerDegree
+				METERSPERDEGREE
 		
 		position = Vector3(
 		
-		    x, y, z
+		    x, 0.0, z
 		)
 		
 	    return position
     }
+
+	fun getYPosition() : Double {
+		return (location.altitude - axysZero.altitude)
+	}
 
 	
 }

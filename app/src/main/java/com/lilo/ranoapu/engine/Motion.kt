@@ -17,15 +17,15 @@ object Motion {
 	
 	private val callbacksAcc = mutableMapOf<String, (Context, Vector3) -> Unit>()
 	
-	fun OnAccChanged(name: String, callback: (Context, Vector3) -> Unit) {
+	fun onAccChanged(name: String, callback: (Context, Vector3) -> Unit) {
 		callbacksAcc[name] = callback
 	}
 	
-	fun RemoveOnAccChanged(name: String) {
+	fun removeOnAccChanged(name: String) {
 		callbacksAcc.remove(name)
 	}
 
-    fun StartAcc(context: Context) {
+    fun startAcc(context: Context) {
 
         sensorManager =
             context.getSystemService(Context.SENSOR_SERVICE)
@@ -43,12 +43,10 @@ object Motion {
                 acceleration.X = event.values[0].toDouble()
                 acceleration.Y = event.values[1].toDouble()
                 acceleration.Z = event.values[2].toDouble()
-				
-				for ( (_, callback)  in callbacksAcc) {
+
+                for ( (_, callback)  in callbacksAcc) {
 					callback(context, acceleration)
 				}
-            
-			
             }
 
             override fun onAccuracyChanged(
@@ -65,13 +63,13 @@ object Motion {
         )
     }
 	
-	fun EndAcc() {
+	fun endAcc() {
         if (! ::listener.isInitialized) return
         sensorManager.unregisterListener(listener)
         
     }
 
-    fun GetAcceleration(): Vector3 {
+    fun getAcceleration(): Vector3 {
         return acceleration
     }
 }
