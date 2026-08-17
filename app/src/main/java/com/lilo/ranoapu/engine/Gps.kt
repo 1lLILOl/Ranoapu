@@ -100,9 +100,13 @@ object Gps {
 	}
 
 	private lateinit var locationCallback: LocationCallback
+	private var isGettingLocation = false
 
 	@RequiresPermission(allOf = [Manifest.permission.ACCESS_FINE_LOCATION, Manifest.permission.ACCESS_COARSE_LOCATION])
     fun startOnLocation() {
+
+        if (isGettingLocation) return
+		isGettingLocation = true
 
 		val request = LocationRequest.Builder(
 			Priority.PRIORITY_HIGH_ACCURACY,
@@ -126,9 +130,14 @@ object Gps {
 			locationCallback,
 			Looper.getMainLooper()
 		)
+		
 	}
 
 	fun endOnLocation() {
+		
+		if (!isGettingLocation) return
+		isGettingLocation = false
+		
 		fusedLocationClient.removeLocationUpdates(locationCallback)
 	}
     
