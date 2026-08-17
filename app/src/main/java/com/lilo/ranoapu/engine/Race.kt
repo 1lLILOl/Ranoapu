@@ -7,6 +7,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import android.content.Context
+import android.location.Location
 import androidx.annotation.RequiresPermission
 
 object Race {
@@ -29,12 +30,9 @@ object Race {
 			val currentTime = elapsedTime + (now - beginTime)
 				
 			RaceData.time = (currentTime) / 1_000_000_000.0
-			val currentPos = Gps.getPosition()
 
-			RaceData.distance = (currentPos - beginPos).magnitude()
-			RaceData.displacement += (currentPos - lastPos).magnitude()
-			
-			lastPos = currentPos
+			RaceData.speed = (RaceData.displacement/RaceData.time) * 3.6
+			RaceData.pace = 60 / RaceData.speed
 				
 			if (RaceData.displacement >= RaceData.maxDist ){
 
@@ -56,6 +54,7 @@ object Race {
 			resetRace()
 			Motion.startAcc(context)
 			beginPos = Gps.getPosition()
+			lastPos = beginPos
 
 			RaceData.raceStarted = true
 		}
@@ -63,25 +62,33 @@ object Race {
 		if (RaceData.manualPause) {
 
 			Motion.onAccChanged("StartRace", ::startRace)
+			Gps.onLocationChanged("RaceUpdateLocation", ::updateLocation)
 			
 		} else {
 
 			Motion.removeOnAccChanged("StartRace")
+			Gps.removeOnLocChanged("RaceUpdateLocation")
 			stopRace()
 		}
 
 		RaceData.manualPause = !RaceData.manualPause
 		
 	}
-	
+
+	private fun updateLocation(location: Location) {
+		val currentPos = Gps.getPosition()
+
+		if (location.accuracy <= 10f) {
+			RaceData.distance = (currentPos - beginPos).magnitude()
+
+			RaceData.displacement += (currentPos - lastPos).magnitude()
+			lastPos = currentPos
+		}
+
+	}
+
 	@RequiresPermission(allOf = [Manifest.permission.ACCESS_FINE_LOCATION, Manifest.permission.ACCESS_COARSE_LOCATION])
     private fun startRace(context: Context, acc :Vector3) {
-		
-		Gps.updateLocation(context, onLocation = { _, ->})
-			
-		RaceData.speed = (RaceData.displacement/RaceData.time) * 3.6
-		RaceData.pace = 60 / RaceData.speed
-		
 
 		if (acc.magnitude() < 1) {
 

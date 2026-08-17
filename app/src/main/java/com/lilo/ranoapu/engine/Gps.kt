@@ -4,13 +4,18 @@ import android.Manifest
 import android.location.Location
 import android.content.Context
 import android.content.pm.PackageManager
+import android.os.Looper
 import androidx.annotation.RequiresPermission
 
 import androidx.core.app.ActivityCompat
 
 import com.google.android.gms.location.FusedLocationProviderClient
+import com.google.android.gms.location.LocationCallback
+import com.google.android.gms.location.LocationResult
 import com.google.android.gms.location.LocationServices
+import com.google.android.gms.location.LocationRequest
 import com.google.android.gms.location.Priority
+
 
 import kotlin.math.PI
 import kotlin.math.cos
@@ -26,10 +31,12 @@ object Gps {
 
 		fusedLocationClient =
             LocationServices.getFusedLocationProviderClient(context)
-			
+
 		updateLocation(context, onLocation = { loc ->
 			axysZero = loc
 		})
+
+		startOnLocation()
 	}
 	
 	private lateinit var location: Location
@@ -81,11 +88,54 @@ object Gps {
 			
 		}
 	}
+
+	private val callbacksLoc = mutableMapOf<String, (Location) -> Unit>()
+
+	fun onLocationChanged(name: String, callback: (Location) -> Unit) {
+		callbacksLoc[name] = callback
+	}
+
+	fun removeOnLocChanged(name: String) {
+		callbacksLoc.remove(name)
+	}
+
+	private lateinit var locationCallback: LocationCallback
+
+	@RequiresPermission(allOf = [Manifest.permission.ACCESS_FINE_LOCATION, Manifest.permission.ACCESS_COARSE_LOCATION])
+    fun startOnLocation() {
+
+		val request = LocationRequest.Builder(
+			Priority.PRIORITY_HIGH_ACCURACY,
+			1000L
+		).build()
+
+		locationCallback = object : LocationCallback() {
+
+			override fun onLocationResult(result: LocationResult) {
+
+				location = result.lastLocation ?: return
+
+				for ((_, callback) in callbacksLoc) {
+					callback(location)
+				}
+			}
+		}
+
+		fusedLocationClient.requestLocationUpdates(
+			request,
+			locationCallback,
+			Looper.getMainLooper()
+		)
+	}
+
+	fun endOnLocation() {
+		fusedLocationClient.removeLocationUpdates(locationCallback)
+	}
     
 	
 	
-	private const val METERSPERDEGREE = 40075000 / 360
-	private const val DEGREETORAD = PI / 180
+	private const val METERSPERDEGREE = 40075000.0 / 360.0
+	private const val DEGREETORAD = PI / 180.0
 
 	fun getPosition() : Vector3 {
 		
@@ -97,7 +147,7 @@ object Gps {
 			
 		val z = (location.latitude - axysZero.latitude) *
 				METERSPERDEGREE
-		
+
 		position = Vector3(
 		
 		    x, 0.0, z
